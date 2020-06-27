@@ -23,6 +23,10 @@ public class Player : MonoBehaviour, InputActions.IPlayerActions
     [Header("Camera Settings")]
     [SerializeField]
     private float _mouseSensativity = 0.25f;
+    [SerializeField]
+    private float _gamepadSensativity = 1.0f;
+    private InputDevice _device;
+    private string _scheme;
 
     private void Awake()
     {
@@ -77,9 +81,21 @@ public class Player : MonoBehaviour, InputActions.IPlayerActions
     private void PlayerLook()
     {
         Vector2 lookInput = _playerControls.Player.Look.ReadValue<Vector2>();
-        lookInput *= _mouseSensativity;
+        if (_scheme == "Keyboard")
+        {
+            lookInput *= _mouseSensativity;
+        }
+        else if (_scheme == "Gamepad")
+        {
+            lookInput *= _gamepadSensativity;
+        }
+        else
+        {
 
-        Vector3 currentRotation = transform.localEulerAngles;
+        }
+
+
+            Vector3 currentRotation = transform.localEulerAngles;
         currentRotation.y += lookInput.x;
         transform.localRotation = Quaternion.AngleAxis(currentRotation.y, Vector3.up);
 
@@ -111,6 +127,12 @@ public class Player : MonoBehaviour, InputActions.IPlayerActions
         
         _horizontal = context.ReadValue<Vector2>().x;
         _vertical = context.ReadValue<Vector2>().y;
+        _device = context.control.device;
+        var scheme = InputControlScheme.FindControlSchemeForDevice(_device, context.action.actionMap.controlSchemes);
+        if (scheme.HasValue)
+        {
+            _scheme = scheme.Value.bindingGroup;
+        }
 
     }
 
